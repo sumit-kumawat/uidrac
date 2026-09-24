@@ -1,0 +1,46 @@
+{
+  "name": "uidrac",
+  "version": "1.2.0",
+  "private": false,
+  "description": "Open-source Universal iDRAC Console — self-hosted Dell fleet management (iDRAC 6–9), no edge agent",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "pnpm --filter @idrac/db generate",
+    "db:migrate": "pnpm --filter @idrac/db migrate",
+    "db:seed": "pnpm --filter @idrac/db seed",
+    "db:studio": "pnpm --filter @idrac/db studio",
+    "docker:dev": "docker compose up -d",
+    "docker:prod": "docker compose -f docker-compose.prod.yml up -d",
+    "docker:build": "docker compose -f docker-compose.prod.yml build",
+    "deploy:vm": "bash scripts/vm-prod.sh",
+    "clean": "turbo clean && rm -rf node_modules",
+    "version:track": "node scripts/version-track.mjs",
+    "prepare": "node scripts/install-git-hooks.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@swc/core": "^1.16.2",
+    "@swc/register": "^0.1.10",
+    "@types/node": "^20.14.0",
+    "eslint": "^9.5.0",
+    "prettier": "^3.3.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.15.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^1.6.0"
+  }
+}

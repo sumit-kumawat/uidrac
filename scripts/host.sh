@@ -11,8 +11,9 @@ if [[ ! -f .env ]]; then
 fi
 
 if grep -q '^JWT_SECRET=dev-jwt-secret-change-in-production' .env 2>/dev/null; then
-  echo "⚠️  OPEN SOURCE WARNING: .env still uses public lab defaults from .env.example."
-  echo "   Run: bash scripts/generate-keys.sh --write   (required before production or shared LAN)"
+  echo "⚠️  OPEN SOURCE: .env still has public lab defaults from .env.example."
+  echo "   Generating unique secrets now (bash scripts/generate-keys.sh --write)…"
+  bash "$(dirname "$0")/generate-keys.sh" --write
   echo ""
 fi
 

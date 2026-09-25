@@ -40,7 +40,7 @@ Open **http://localhost:3000** → Register → Add Server (iDRAC IP + credentia
 | Step | Action |
 |------|--------|
 | 1 | Linux VM with Docker; VM must reach **iDRAC HTTPS (443)** on your LAN |
-| 2 | `cp .env.selfhosted.example .env` + secrets from `scripts/generate-keys.sh` |
+| 2 | `cp .env.selfhosted.example .env` then `bash scripts/generate-keys.sh --write` |
 | 3 | Set all `PUBLIC_*` / `NEXT_PUBLIC_*` / `CORS_ORIGINS` to your **https://** site URL |
 | 4 | TLS in `nginx/certs/` ([help](nginx/certs/README.md)); `server_name` in `nginx/nginx.conf` |
 | 5 | `bash scripts/vm-prod.sh` → `curl -sk https://YOUR_HOST/api/health` |

@@ -13,7 +13,6 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
-COPY apps/edge-agent/package.json ./apps/edge-agent/
 COPY apps/web/package.json ./apps/web/
 COPY apps/console-gw/package.json ./apps/console-gw/
 COPY packages/shared/package.json ./packages/shared/

@@ -1,19 +1,18 @@
 {
   "productName": "Universal iDRAC Console",
-  "publisher": "Conzex Global Private Limited",
-  "versioningPolicy": "Semantic versioning (major.minor.patch). Patch releases accumulate product fixes and refinements; minor releases add capabilities; major releases denote platform milestones.",
+  "publisher": "Sumit Kumawat (open source)",
+  "versioningPolicy": "Semantic versioning (major.minor.patch). Patch builds update the running version automatically; the public version manager lists major and minor milestones only.",
   "releases": [
     {
       "version": "1.2.0",
       "released": "2026-09-24",
       "kind": "minor",
-      "title": "Cloud edge agent & enterprise administration",
+      "title": "Enterprise administration & UX",
       "coreImplementation": [
-        "Per-tenant edge agent with secure WebSocket registration and downloadable packages",
-        "LAN-side iDRAC probing for cloud deployments with tenant isolation",
         "Platform admin console: organizations, users, audit visibility without exposing iDRAC secrets",
-        "Profile, password management, and improved auth flows for marketing vs app surfaces",
-        "Branded Conzex product experience across marketing, docs, and contact"
+        "Profile, password management, and improved auth flows",
+        "Documentation, version manager, and contact/FAQ improvements",
+        "Direct LAN iDRAC probing from the API (no edge agent in this edition)"
       ]
     },
     {

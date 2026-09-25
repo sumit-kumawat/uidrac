@@ -5,6 +5,9 @@ import { PlusCircle, Search, ServerCrash, AlertTriangle, RefreshCw } from 'lucid
 import api from '@/lib/api';
 import { readStoredUser } from '@/lib/auth-client';
 import { canMutateServers } from '@/lib/rbac';
+import AppPageHeader from '@/components/layout/app-page-header';
+import { useAddServerModal } from '@/components/servers/add-server-modal-context';
+import { AddServerHeaderActions } from '@/components/servers/add-server-header-actions';
 
 const healthColors: Record<string, string> = { HEALTHY: 'bg-green-healthy', WARNING: 'bg-amber-warning', CRITICAL: 'bg-red-critical', UNKNOWN: 'bg-gray-400' };
 const genColors: Record<string, string> = { GEN6: 'bg-gray-500', GEN7: 'bg-amber-warning', GEN8: 'bg-blue-500', GEN9: 'bg-dell-blue' };
@@ -28,10 +31,16 @@ export default function DashboardPage() {
   const filtered = servers.filter((s) => !search || s.name.toLowerCase().includes(search.toLowerCase()) || s.ip.includes(search));
   const stats = { total: servers.length, healthy: servers.filter((s) => s.health === 'HEALTHY').length, warning: servers.filter((s) => s.health === 'WARNING').length, critical: servers.filter((s) => s.health === 'CRITICAL').length };
   const canAdd = canMutateServers(readStoredUser()?.role);
+  const { openAddServer } = useAddServerModal();
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-text-primary mb-6">Server Fleet</h1>
+      <AppPageHeader
+        title="Server fleet"
+        description="Monitor health and open any server for power, console, and configuration tasks."
+        className="mb-6"
+        actions={canAdd ? <AddServerHeaderActions /> : undefined}
+      />
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-critical text-sm p-4 rounded mb-6 flex items-center justify-between">
@@ -77,9 +86,15 @@ export default function DashboardPage() {
           <p className="text-sm text-text-secondary mb-6 max-w-sm mx-auto">
             Ensure the API container can reach your iDRAC management network, then add your first server.
           </p>
-          <a href="/servers/new" className="inline-flex px-5 py-2.5 bg-dell-blue text-white text-sm font-semibold rounded hover:bg-dell-blue-hover transition-colors items-center gap-1.5">
-            <PlusCircle className="w-4 h-4" /> Add Your First Server
-          </a>
+          {canAdd && (
+            <button
+              type="button"
+              onClick={openAddServer}
+              className="inline-flex px-5 py-2.5 bg-dell-blue text-white text-sm font-semibold rounded hover:bg-dell-blue-hover transition-colors items-center gap-1.5"
+            >
+              <PlusCircle className="w-4 h-4" /> Add Your First Server
+            </button>
+          )}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-text-secondary">

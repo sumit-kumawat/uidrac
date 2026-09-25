@@ -20,7 +20,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     websockify \
-    firefox-esr \
     wget \
     curl \
     ca-certificates \
@@ -39,6 +38,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     procps \
     net-tools \
     && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && (apt-get update && apt-get install -y --no-install-recommends firefox-esr \
+        || apt-get install -y --no-install-recommends firefox \
+        || true) \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for running the viewer

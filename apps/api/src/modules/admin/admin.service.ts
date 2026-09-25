@@ -4,10 +4,15 @@ import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma.service';
 import { isPlatformSuperAdmin } from '../../common/platform-admin.util';
+import { assertUserMayBeDeleted } from '../../common/protected-admin.util';
+import { MailService } from '../../common/mail.service';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mail: MailService,
+  ) {}
 
   private async assertSuperAdmin(actor: { sub: string; tenantId: string; role: string }) {
     if (!(await isPlatformSuperAdmin(this.prisma, { tenantId: actor.tenantId, role: actor.role }))) {
@@ -34,8 +39,7 @@ export class AdminService {
   async deleteUser(actor: { sub: string; tenantId: string; role: string }, userId: string) {
     await this.assertSuperAdmin(actor);
     if (userId === actor.sub) throw new ForbiddenException('You cannot delete your own account here');
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
+    await assertUserMayBeDeleted(this.prisma, userId);
     await this.prisma.user.delete({ where: { id: userId } });
     return { deleted: true };
   }
@@ -44,14 +48,20 @@ export class AdminService {
     await this.assertSuperAdmin(actor);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
+    this.mail.assertDeliverableAccountEmail(user.email);
+    const previousHash = user.passwordHash;
     const temporaryPassword = crypto.randomBytes(9).toString('base64url');
     const passwordHash = await argon2.hash(temporaryPassword, { type: argon2.argon2id });
     await this.prisma.session.deleteMany({ where: { userId } });
     await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    try {
+      await this.mail.sendPasswordResetToAccountEmail(user.email, temporaryPassword);
+    } catch (err) {
+      await this.prisma.user.update({ where: { id: userId }, data: { passwordHash: previousHash } });
+      throw err;
+    }
     return {
-      message: 'Temporary password generated. Share it securely with the user; they should change it after login.',
-      temporaryPassword,
-      email: user.email,
+      message: `Password reset instructions were sent to the email address on file for this account (${user.email}).`,
     };
   }
 

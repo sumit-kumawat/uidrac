@@ -7,6 +7,8 @@ import {
   ChevronDown, ChevronRight, Eye, Clock, AlertTriangle, FileText, KeyRound,
 } from 'lucide-react';
 import api from '@/lib/api';
+import AppPageHeader from '@/components/layout/app-page-header';
+import { PRIMARY_PLATFORM_ADMIN_EMAIL } from '@idrac/shared';
 
 interface Tenant { id: string; name: string; slug: string; plan: string; createdAt: string; _count?: { users: number; servers: number } }
 interface UserRow { id: string; email: string; role: string; tenantId: string; createdAt: string; lastLoginAt: string | null; tenant?: { name: string } }
@@ -92,8 +94,7 @@ export default function AdminPage() {
       const res = isSuperAdmin
         ? await api.post(`/admin/users/${userId}/reset-password`)
         : await api.post(`/tenant/users/${userId}/reset-password`);
-      const temp = res.data.temporaryPassword;
-      alert(`Temporary password for ${res.data.email}:\n\n${temp}\n\nShare securely. User should change it after login.`);
+      alert(res.data.message || 'Password reset email sent to the address on file for this account.');
     } catch (e: any) {
       alert(e.response?.data?.message || 'Reset failed');
     }
@@ -151,6 +152,8 @@ export default function AdminPage() {
     return 'bg-gray-100 text-gray-600';
   };
 
+  const isPrimaryPlatformAdmin = (u: UserRow) => u.email === PRIMARY_PLATFORM_ADMIN_EMAIL;
+
   const filteredUsers = search ? users.filter((u) => u.email.toLowerCase().includes(search.toLowerCase()) || u.tenant?.name?.toLowerCase().includes(search.toLowerCase())) : users;
   const filteredServers = search ? servers.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()) || s.ip.includes(search) || s.tenant?.name?.toLowerCase().includes(search.toLowerCase())) : servers;
 
@@ -173,23 +176,19 @@ export default function AdminPage() {
 
   return (
     <>
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-dell-blue text-white flex items-center justify-center">
-            <Shield className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-text-primary">Admin Panel</h1>
-            <p className="text-xs text-text-secondary">
-              {isSuperAdmin ? 'Super Admin — Cross-tenant management' : 'Organization Administration'}
-            </p>
-          </div>
-        </div>
-        <button onClick={loadData} className="px-4 py-2 bg-dell-blue text-white text-sm font-semibold rounded hover:bg-dell-blue-hover transition-colors flex items-center gap-2">
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh
-        </button>
-      </div>
+      <AppPageHeader
+        title="Admin panel"
+        description={isSuperAdmin ? 'Super admin — cross-tenant management' : 'Organization administration'}
+        actions={
+          <button
+            type="button"
+            onClick={loadData}
+            className="px-4 py-2 bg-dell-blue text-white text-sm font-semibold rounded hover:bg-dell-blue-hover transition-colors flex items-center gap-2"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </button>
+        }
+      />
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-white border border-border-card rounded p-1 overflow-x-auto">
@@ -386,9 +385,13 @@ export default function AdminPage() {
                         <button type="button" onClick={() => resetUserPassword(u.id)} className="px-2 py-1 text-xs rounded bg-amber-50 text-amber-800 hover:bg-amber-100 inline-flex items-center gap-1">
                           <KeyRound className="w-3 h-3" /> Reset
                         </button>
-                        <button type="button" onClick={() => deleteUser(u.id)} className="px-2 py-1 text-xs rounded bg-red-50 text-red-critical hover:bg-red-100 inline-flex items-center gap-1">
-                          <Trash2 className="w-3 h-3" /> Delete
-                        </button>
+                        {isPrimaryPlatformAdmin(u) ? (
+                          <span className="text-[10px] text-text-secondary">Protected</span>
+                        ) : (
+                          <button type="button" onClick={() => deleteUser(u.id)} className="px-2 py-1 text-xs rounded bg-red-50 text-red-critical hover:bg-red-100 inline-flex items-center gap-1">
+                            <Trash2 className="w-3 h-3" /> Delete
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

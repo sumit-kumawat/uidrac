@@ -11,7 +11,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const STATE_PATH = path.join(ROOT, '.idrac-version-state.json');
 const VERSION_TS = path.join(ROOT, 'packages/shared/src/version.ts');
-const RELEASE_HISTORY_PATH = path.join(ROOT, 'packages/shared/src/release-history.json');
 
 const PACKAGE_JSON_PATHS = [
   path.join(ROOT, 'package.json'),
@@ -62,24 +61,6 @@ export const APP_VERSION_LABEL = \`v\${APP_VERSION}\`;
   fs.writeFileSync(VERSION_TS, content);
 }
 
-function ensurePatchReleaseInHistory(version) {
-  if (!fs.existsSync(RELEASE_HISTORY_PATH)) return;
-  const catalog = JSON.parse(fs.readFileSync(RELEASE_HISTORY_PATH, 'utf8'));
-  if (!Array.isArray(catalog.releases)) catalog.releases = [];
-  if (catalog.releases.some((r) => r.version === version)) return;
-  catalog.releases.unshift({
-    version,
-    released: new Date().toISOString().slice(0, 10),
-    kind: 'patch',
-    title: 'Maintenance release',
-    coreImplementation: [
-      'Bug fixes, stability improvements, and product refinements from ongoing development.',
-    ],
-  });
-  fs.writeFileSync(RELEASE_HISTORY_PATH, `${JSON.stringify(catalog, null, 2)}\n`);
-  console.log(`[version-track] Added v${version} to release-history.json`);
-}
-
 function main() {
   const state = readState();
   state.changeCount = (state.changeCount || 0) + 1;
@@ -87,8 +68,7 @@ function main() {
   if (state.changeCount >= 10) {
     state.version = bumpPatch(state.version || '1.0.0');
     state.changeCount = 0;
-    console.log(`[version-track] Bumped to v${state.version}`);
-    ensurePatchReleaseInHistory(state.version);
+    console.log(`[version-track] Bumped to v${state.version} (patch — not added to public release log)`);
   } else {
     console.log(`[version-track] Change ${state.changeCount}/10 (v${state.version})`);
   }

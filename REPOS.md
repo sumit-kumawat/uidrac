@@ -1,13 +1,38 @@
-# Repository layout
+# Dual repository workflow (engineering)
 
-| Repository | Maintainer | Edge agent | License |
-|------------|------------|------------|---------|
-| **[sumit-kumawat/uidrac](https://github.com/sumit-kumawat/uidrac)** (this tree) | Sumit Kumawat · community | **No** — API reaches iDRAC directly | **MIT** |
-| **[conzex/uidrac](https://github.com/conzex/uidrac)** | Conzex Global Private Limited | Yes (cloud / SaaS) | Proprietary product |
+Two code lines share history but different distribution. **Do not publish Conzex product clone URLs to customers.**
 
-This is the **open-source** edition. For the Conzex product with edge agents and commercial support, use `conzex/uidrac`.
+| | Conzex product | Open-source fork (this repo) |
+|---|----------------|------------------------------|
+| **Role** | Proprietary product + edge agent | MIT, no edge agent |
+| **Remote name** | Conzex engineering remote (private) | `sumit-kumawat/uidrac` |
+| **OSS URL** | — | https://github.com/sumit-kumawat/uidrac |
+| **Local folder** | `universal-idrac-console/` | `uidrac/` |
+
+## What differs
+
+| Area | Conzex product | OSS fork |
+|------|----------------|----------|
+| Edge agent | Yes | Removed |
+| Branding / contact | Conzex | Sumit Kumawat / MIT |
+| Customer docs | Usage guide in app; no public GitHub install | Self-host README + this repo |
+
+## After shared feature work
+
+Report changes in three blocks:
+
+**Conzex** — Conzex product tree (engineering)  
+**Personal** — https://github.com/sumit-kumawat/uidrac  
+**Shared behavior** — what both user bases get
+
+## Remotes (engineers)
 
 ```bash
-git remote add origin https://github.com/sumit-kumawat/uidrac.git
-git push -u origin main
+# Conzex product — use your authorized Conzex engineering remote (not customer-facing)
+git remote set-url origin <conzex-engineering-remote>
+
+# OSS fork (this repository)
+git remote set-url origin https://github.com/sumit-kumawat/uidrac.git
 ```
+
+The Conzex product tree maintains the same engineering notes in its `REPOS.md` (without customer-facing GitHub URLs for the product line).

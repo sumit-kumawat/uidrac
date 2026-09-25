@@ -1,13 +1,23 @@
 # Deployment guide — Universal iDRAC Console
 
-This guide covers hosting on **your own VM** (primary), optional **Conzex cloud** mode, and lab setups.
+This guide covers **self-hosted VM** deployment and local lab Docker for the open-source tree.
+
+## GitHub repositories
+
+| Repository | URL |
+|------------|-----|
+| **Open-source (this tree, MIT)** | https://github.com/sumit-kumawat/uidrac |
+| **Maintainer** | https://www.sumitkumawat.com |
+| **Conzex commercial product** | https://www.conzex.com (cloud-hosted; not distributed via public GitHub) |
+
+Dual-repo workflow: [REPOS.md](../REPOS.md) in this repository.
 
 | Goal | Start here |
 |------|------------|
 | Production on a Linux VM | [Self-hosted VM](#self-hosted-vm-production) |
 | Publish via **Cloudflare Tunnel** (no open 80/443) | [Cloudflare Tunnel](CLOUDFLARE-TUNNEL.md) — origin **`https://127.0.0.1:443`** |
 | Local laptop / lab | [Lab Docker](#lab-docker-compose) |
-| Cloud + edge agent | [Cloud mode](#cloud-mode-uidracconzexcom) |
+| Cloud + edge agent (Conzex product only) | Contact [Conzex](https://www.conzex.com) — not part of this OSS tree |
 
 ---
 
@@ -27,8 +37,8 @@ Use this when the VM can reach iDRAC management IPs on your network. **No edge a
 
 ```bash
 # On the VM
-git clone <your-deployment-source> universal-idrac-console
-cd universal-idrac-console
+git clone https://github.com/sumit-kumawat/uidrac.git
+cd uidrac
 
 cp .env.selfhosted.example .env
 bash scripts/generate-keys.sh
@@ -70,7 +80,7 @@ docker compose -f docker-compose.prod.yml exec -T postgres \
   pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > backup.sql
 
 # Volumes (alternative)
-docker run --rm -v universal-idrac-console_postgres-data:/data -v $(pwd):/backup \
+docker run --rm -v uidrac_postgres-data:/data -v $(pwd):/backup \
   alpine tar czf /backup/postgres-data.tgz /data
 ```
 
@@ -98,21 +108,16 @@ bash scripts/host.sh
 Build legacy console for iDRAC 6/7:
 
 ```bash
-docker build -f docker/idrac-legacy.Dockerfile -t universal-idrac-console:legacy .
+docker build -f docker/idrac-legacy.Dockerfile -t uidrac:legacy .
 ```
 
 ---
 
-## Cloud mode (uidrac.conzex.com)
+## Cloud mode (Conzex commercial product)
 
-When the API **cannot** reach iDRAC directly, use **edge agents** on customer LANs.
+This **MIT fork** is self-hosted only: the API connects to iDRAC on your LAN directly.
 
-1. Copy **`.env.cloud.example`** → `.env`
-2. Set `DEPLOYMENT_MODE=cloud`, `REQUIRE_EDGE_AGENT=true`, public URLs, `AGENT_SIGNING_SECRET`
-3. Deploy: `docker compose -f docker-compose.prod.yml up -d --build`
-4. Customers download the agent from **Settings** and connect via `wss://…/api/agent/ws`
-
-See [`EDGE_AGENT.md`](EDGE_AGENT.md).
+**Cloud hosting with UiDRAC agents** is offered by [Conzex](https://www.conzex.com), not via this repository. Do not enable `REQUIRE_EDGE_AGENT` or agent bundles in the OSS tree—they are not included here.
 
 ---
 
@@ -185,7 +190,7 @@ Match `server_name`, certificate CN/SAN, and `PUBLIC_APP_URL`. After testing wit
 `console-gw` needs `/var/run/docker.sock`. On hardened hosts, ensure the daemon user can spawn containers and the legacy image exists:
 
 ```bash
-docker images | grep universal-idrac-console
+docker images | grep uidrac
 ```
 
 ---

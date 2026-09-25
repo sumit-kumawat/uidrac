@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { UserPlus, Shield, Building2 } from 'lucide-react';
 import api from '@/lib/api';
 import { persistAuth } from '@/lib/auth-client';
+import { PRODUCT_NAME } from '@idrac/shared';
 import PublicChrome from '@/components/layout/public-chrome';
 import RedirectIfAuthenticated from '@/components/auth/redirect-if-authenticated';
 
@@ -36,7 +37,7 @@ export default function RegisterPage() {
         <div className="bg-white border border-border-card rounded shadow-xl w-full max-w-md p-8">
           <div className="text-center mb-6">
             <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
-              <img src="/logo.png" alt="iDRAC Console" className="h-14 mx-auto mb-4" />
+              <img src="/logo.png" alt={PRODUCT_NAME} className="h-14 mx-auto mb-4" />
             </Link>
             <h1 className="text-xl font-bold text-text-primary">Create Account</h1>
             <p className="text-sm text-text-secondary mt-1">Register your organization and start managing servers on your LAN</p>

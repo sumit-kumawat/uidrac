@@ -26,8 +26,8 @@ and instructions for contributing to the Universal iDRAC Console project.
 
 ```bash
 # Clone the repository
-git clone https://github.com/sumit-kumawat/universal-idrac-console.git
-cd universal-idrac-console
+git clone https://github.com/sumit-kumawat/uidrac.git
+cd uidrac
 
 # Install dependencies
 pnpm install

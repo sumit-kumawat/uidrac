@@ -5,8 +5,12 @@ import { Plus, Pencil, Trash2, X, Save, AlertTriangle, Search } from 'lucide-rea
 import api from '@/lib/api';
 import { readStoredUser } from '@/lib/auth-client';
 import { canDeleteServers, canMutateServers } from '@/lib/rbac';
+import AppPageHeader from '@/components/layout/app-page-header';
+import { useAddServerModal } from '@/components/servers/add-server-modal-context';
+import { AddServerHeaderActions } from '@/components/servers/add-server-header-actions';
 
 export default function ServersPage() {
+  const { openAddServer } = useAddServerModal();
   const [servers, setServers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -86,7 +90,12 @@ export default function ServersPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4">Servers</h1>
+      <AppPageHeader
+        title="Servers"
+        description={canEdit ? 'Manage iDRAC endpoints in your organization.' : 'View servers in your organization.'}
+        className="mb-4"
+        actions={canEdit ? <AddServerHeaderActions /> : undefined}
+      />
 
       {actionMsg && (
         <div className="bg-blue-50 border border-blue-200 text-dell-blue text-sm p-3 rounded mb-4 flex items-center justify-between">
@@ -120,9 +129,13 @@ export default function ServersPage() {
           <div className="p-12 text-center">
             <p className="text-text-secondary mb-4">No servers added yet.</p>
             {canEdit && (
-              <a href="/servers/new" className="px-4 py-2 bg-dell-blue text-white text-sm rounded hover:bg-dell-blue-hover inline-flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={openAddServer}
+                className="px-4 py-2 bg-dell-blue text-white text-sm rounded hover:bg-dell-blue-hover inline-flex items-center gap-1.5"
+              >
                 <Plus className="w-4 h-4" /> Add Your First Server
-              </a>
+              </button>
             )}
           </div>
         ) : (

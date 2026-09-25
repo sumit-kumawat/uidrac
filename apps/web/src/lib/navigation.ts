@@ -35,7 +35,7 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
   },
   { href: '/audit', label: 'Audit Log', Icon: FileText, minRole: 'VIEWER' },
   { href: '/settings', label: 'Settings', Icon: Settings, minRole: 'VIEWER' },
-  { href: '/admin', label: 'Admin', Icon: Shield, minRole: 'OWNER', exact: true },
+  { href: '/admin', label: 'Admin', Icon: Shield, minRole: 'ADMIN', exact: true },
 ];
 
 export type PublicNavLink = {
@@ -80,6 +80,6 @@ export function isPublicMarketingPath(pathname: string | null): boolean {
 export const PUBLIC_HEADER_OFFSET_PX = 52;
 
 /** Sticky offset below fixed header(s). App shell = 52 + 40. */
-export function headerStickyOffsetPx(underAppShell: boolean): number {
+export function headerStickyOffsetPx(underAppShell?: boolean): number {
   return underAppShell ? 92 : PUBLIC_HEADER_OFFSET_PX;
 }

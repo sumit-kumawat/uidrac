@@ -1,51 +1,38 @@
-/** Contact page — Conzex product support, detailed FAQ, and message form. */
+/** Contact page — Open-source maintainer, FAQ, and message form. */
 'use client';
 
-import { Mail, Globe, Phone, Send, ChevronDown, HelpCircle } from 'lucide-react';
+import { Mail, Globe, Send, ChevronDown, HelpCircle, Github } from 'lucide-react';
 import PublicChrome from '@/components/layout/public-chrome';
 import Link from 'next/link';
 import { useState } from 'react';
+import {
+  GITHUB_REPO_OSS,
+  OSS_AUTHOR_EMAIL,
+  OSS_AUTHOR_PROFILE_URL,
+  PRODUCT_NAME,
+  CONZEX_WEB_URL,
+} from '@idrac/shared';
 
 const FAQ = [
   {
-    q: 'What is Universal iDRAC Console?',
-    a: 'It is a commercial product from Conzex Global Private Limited that provides a single web console for Dell PowerEdge servers across iDRAC 6 through 9—without Java plugins or generation-specific browser requirements.',
+    q: `What is ${PRODUCT_NAME}?`,
+    a: `${PRODUCT_NAME} is an open-source, self-hosted web console for Dell PowerEdge servers with iDRAC 6 through 9. This repository (sumit-kumawat/uidrac) is MIT-licensed and connects to iDRAC on your LAN without an edge agent.`,
   },
   {
-    q: 'Is this open source software?',
-    a: 'No. Universal iDRAC Console is proprietary software developed and supported by Conzex. You deploy it on your own infrastructure (or Conzex-managed cloud); source code and licensing are provided under your agreement with Conzex.',
+    q: 'Is this the same as the Conzex product?',
+    a: `Related codebase, different distribution. The Conzex product is a commercial, cloud-hosted offering with an optional UiDRAC agent ([Conzex](${CONZEX_WEB_URL})). This fork stays MIT-licensed and self-hosted under Sumit Kumawat.`,
   },
   {
-    q: 'How do I obtain a deployment?',
-    a: 'Contact Conzex for licensing, deployment packages, and environment guidance. Standard delivery uses Docker Compose with PostgreSQL and Redis; Conzex can assist with production hardening, TLS, and backups.',
-  },
-  {
-    q: 'What is the difference between cloud and self-hosted mode?',
-    a: 'Self-hosted installs typically reach iDRAC addresses directly from the API network. Cloud deployments use a per-tenant edge agent on your LAN to probe and manage iDRAC while keeping tenant traffic isolated.',
-  },
-  {
-    q: 'When is the edge agent required?',
-    a: 'When the platform runs in cloud mode and iDRAC endpoints are not reachable from the central API. Download the agent for your OS, register it to your organization, and add servers only after the agent shows connected.',
+    q: 'How do I get help or contribute?',
+    a: `Open a GitHub issue or pull request on ${GITHUB_REPO_OSS}. For direct contact, email the maintainer.`,
   },
   {
     q: 'Which server generations are supported?',
-    a: 'PowerEdge systems with iDRAC 6, 7, 8, or 9 (roughly 11G through 16G). The platform auto-detects Redfish vs legacy protocols during server registration.',
+    a: 'PowerEdge systems with iDRAC 6, 7, 8, or 9. The platform auto-detects Redfish vs legacy protocols during server registration.',
   },
   {
-    q: 'How are credentials and audit data handled?',
-    a: 'iDRAC credentials are encrypted at rest (AES-256). Role-based access controls scope users to their organization. Administrative actions are recorded in an immutable audit log suitable for compliance review.',
-  },
-  {
-    q: 'How do version upgrades work?',
-    a: 'Releases follow semantic versioning (major.minor.patch). See the version manager for release notes and core implementation details for each build, including the current v1.2.x line.',
-  },
-  {
-    q: 'What support channels are available?',
-    a: 'Use email, phone, or WhatsApp listed on this page for sales, technical support, and escalation. Include your organization name, deployment mode (cloud/self-hosted), and agent status when reporting issues.',
-  },
-  {
-    q: 'Can Conzex customize integrations or branding?',
-    a: 'Yes. Enterprise customers can discuss custom domains, SSO, monitoring hooks, and managed operations. Describe your requirements in the contact form or schedule a call.',
+    q: 'How are credentials handled?',
+    a: 'iDRAC credentials are encrypted at rest (AES-256). Role-based access controls scope users to their organization. Actions are recorded in an audit log.',
   },
 ] as const;
 
@@ -56,20 +43,31 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const mailto = `mailto:info@conzex.com?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(`From: ${form.name} (${form.email})\n\n${form.message}`)}`;
+    const mailto = `mailto:${OSS_AUTHOR_EMAIL}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(`From: ${form.name} (${form.email})\n\n${form.message}`)}`;
     window.open(mailto);
     setSent(true);
   };
 
   return (
     <PublicChrome mainClassName="bg-bg-body py-10">
-      <h1 className="text-xl font-bold text-text-primary mb-1">Contact Conzex</h1>
+      <h1 className="text-xl font-bold text-text-primary mb-1">Contact</h1>
       <p className="text-sm text-text-secondary mb-2 max-w-2xl leading-relaxed">
-        Universal iDRAC Console is a product of <strong className="text-text-primary">Conzex Global Private Limited</strong>.
-        Reach out for licensing, deployment assistance, support, or partnership inquiries.
+        <strong className="text-text-primary">{PRODUCT_NAME}</strong> open source by{' '}
+        <a href={OSS_AUTHOR_PROFILE_URL} className="text-dell-blue font-semibold hover:underline">
+          Sumit Kumawat
+        </a>
+        . Questions, contributions, and feedback welcome.
       </p>
       <p className="text-sm text-text-secondary mb-8">
-        Release notes and build history:{' '}
+        Repositories:{' '}
+        <a href={GITHUB_REPO_OSS} className="text-dell-blue font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
+          sumit-kumawat/uidrac
+        </a>
+        {' · '}
+        <a href={CONZEX_WEB_URL} className="text-dell-blue font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
+          Conzex (commercial product)
+        </a>
+        {' · '}
         <Link href="/versions" className="text-dell-blue font-semibold hover:underline">
           Version manager
         </Link>
@@ -78,155 +76,108 @@ export default function ContactPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
         <div className="space-y-4">
           <div className="bg-white border border-border-card rounded">
-            <div className="bg-card-header px-4 py-2.5 border-b border-border-card">
-              <h2 className="text-[13px] font-bold uppercase tracking-wide text-text-primary">Contact information</h2>
+            <div className="px-5 py-4 border-b border-border-card">
+              <h2 className="text-sm font-semibold text-text-primary">Maintainer</h2>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="px-5 py-4 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded bg-dell-blue/10 text-dell-blue flex items-center justify-center shrink-0">
-                  <Mail className="w-4 h-4" />
-                </div>
+                <Globe className="w-4 h-4 text-dell-blue mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-sm font-semibold text-text-primary">Email</div>
-                  <a href="mailto:info@conzex.com" className="text-sm text-dell-blue hover:underline">
-                    info@conzex.com
-                  </a>
-                  <p className="text-xs text-text-secondary mt-1">Sales, licensing, and technical support</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded bg-dell-blue/10 text-dell-blue flex items-center justify-center shrink-0">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-text-primary">Website</div>
-                  <a
-                    href="https://www.conzex.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-dell-blue hover:underline"
-                  >
-                    www.conzex.com
+                  <p className="text-xs text-text-secondary">Profile</p>
+                  <a href={OSS_AUTHOR_PROFILE_URL} className="text-sm text-dell-blue hover:underline">
+                    www.sumitkumawat.com
                   </a>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded bg-dell-blue/10 text-dell-blue flex items-center justify-center shrink-0">
-                  <Phone className="w-4 h-4" />
-                </div>
+                <Mail className="w-4 h-4 text-dell-blue mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-sm font-semibold text-text-primary">Call / WhatsApp</div>
-                  <a href="tel:+918007060308" className="text-sm text-dell-blue hover:underline">
-                    (+91) 800 7060 308
+                  <p className="text-xs text-text-secondary">Email</p>
+                  <a href={`mailto:${OSS_AUTHOR_EMAIL}`} className="text-sm text-dell-blue hover:underline">
+                    {OSS_AUTHOR_EMAIL}
                   </a>
-                  <p className="text-xs text-text-secondary mt-1">Business hours IST; WhatsApp for quick updates</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Github className="w-4 h-4 text-dell-blue mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-text-secondary">Open-source repo</p>
+                  <a href={GITHUB_REPO_OSS} className="text-sm text-dell-blue hover:underline break-all" target="_blank" rel="noopener noreferrer">
+                    github.com/sumit-kumawat/uidrac
+                  </a>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="bg-white border border-border-card rounded p-4">
-            <h3 className="text-sm font-semibold text-text-primary mb-2">What to include in your message</h3>
-            <ul className="text-sm text-text-secondary space-y-1.5 list-disc pl-5 leading-relaxed">
-              <li>Organization name and deployment region</li>
-              <li>Approximate fleet size and iDRAC generations</li>
-              <li>Cloud vs self-hosted and edge agent status (if applicable)</li>
-              <li>Whether you need evaluation, production rollout, or support escalation</li>
-            </ul>
           </div>
         </div>
 
         <div className="bg-white border border-border-card rounded">
-          <div className="bg-card-header px-4 py-2.5 border-b border-border-card">
-            <h2 className="text-[13px] font-bold uppercase tracking-wide text-text-primary">Send a message</h2>
+          <div className="px-5 py-4 border-b border-border-card">
+            <h2 className="text-sm font-semibold text-text-primary">Send a message</h2>
           </div>
-          <div className="p-4">
+          <form onSubmit={handleSubmit} className="px-5 py-4 space-y-3">
             {sent ? (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 rounded-full bg-green-50 text-green-healthy flex items-center justify-center mx-auto mb-3">
-                  <Send className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-semibold text-text-primary mb-1">Message ready</p>
-                <p className="text-sm text-text-secondary">Your email client should open with the message pre-filled to info@conzex.com.</p>
-              </div>
+              <p className="text-sm text-text-secondary">Your email client should open with the message pre-filled to {OSS_AUTHOR_EMAIL}.</p>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1">Name</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    required
-                    placeholder="Your name"
-                    className="w-full px-3 py-2 border border-border-card rounded text-sm focus:outline-none focus:ring-2 focus:ring-dell-blue focus:border-dell-blue"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    required
-                    placeholder="your@company.com"
-                    className="w-full px-3 py-2 border border-border-card rounded text-sm focus:outline-none focus:ring-2 focus:ring-dell-blue focus:border-dell-blue"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1">Subject</label>
-                  <input
-                    value={form.subject}
-                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                    required
-                    placeholder="Licensing / support / demo request"
-                    className="w-full px-3 py-2 border border-border-card rounded text-sm focus:outline-none focus:ring-2 focus:ring-dell-blue focus:border-dell-blue"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1">Message</label>
-                  <textarea
-                    value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
-                    required
-                    rows={5}
-                    placeholder="Tell us about your environment and how we can help…"
-                    className="w-full px-3 py-2 border border-border-card rounded text-sm resize-none focus:outline-none focus:ring-2 focus:ring-dell-blue focus:border-dell-blue"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-2.5 bg-dell-blue text-white text-sm font-semibold rounded hover:bg-dell-blue-hover transition-colors flex items-center justify-center gap-2"
-                >
-                  <Send className="w-4 h-4" /> Send message
+              <>
+                <input
+                  required
+                  placeholder="Your name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-border-card rounded text-sm"
+                />
+                <input
+                  required
+                  type="email"
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-border-card rounded text-sm"
+                />
+                <input
+                  required
+                  placeholder="Subject"
+                  value={form.subject}
+                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                  className="w-full px-3 py-2 border border-border-card rounded text-sm"
+                />
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Message"
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  className="w-full px-3 py-2 border border-border-card rounded text-sm"
+                />
+                <button type="submit" className="inline-flex items-center gap-2 bg-dell-blue text-white text-sm font-semibold px-4 py-2 rounded hover:bg-dell-blue-dark">
+                  <Send className="w-4 h-4" /> Open in email
                 </button>
-              </form>
+              </>
             )}
-          </div>
+          </form>
         </div>
       </div>
 
-      <div className="bg-white border border-border-card rounded overflow-hidden">
-        <div className="bg-card-header px-4 py-2.5 border-b border-border-card flex items-center gap-2">
+      <div className="bg-white border border-border-card rounded">
+        <div className="px-5 py-4 border-b border-border-card flex items-center gap-2">
           <HelpCircle className="w-4 h-4 text-dell-blue" />
-          <h2 className="text-[13px] font-bold uppercase tracking-wide text-text-primary">Frequently asked questions</h2>
+          <h2 className="text-sm font-semibold text-text-primary">FAQ</h2>
         </div>
         <div className="divide-y divide-border-card">
-          {FAQ.map((item, index) => {
-            const open = openFaq === index;
-            return (
-              <div key={item.q}>
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(open ? null : index)}
-                  className="w-full px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-row-hover transition-colors"
-                >
-                  <span className="text-sm font-semibold text-text-primary">{item.q}</span>
-                  <ChevronDown className={`w-4 h-4 text-text-secondary shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
-                </button>
-                {open && <p className="px-4 pb-4 text-sm text-text-secondary leading-relaxed">{item.a}</p>}
-              </div>
-            );
-          })}
+          {FAQ.map((item, i) => (
+            <div key={item.q}>
+              <button
+                type="button"
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full px-5 py-3 flex items-center justify-between text-left text-sm font-medium text-text-primary hover:bg-bg-body/50"
+              >
+                {item.q}
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+              </button>
+              {openFaq === i && <p className="px-5 pb-4 text-sm text-text-secondary leading-relaxed">{item.a}</p>}
+            </div>
+          ))}
         </div>
       </div>
     </PublicChrome>

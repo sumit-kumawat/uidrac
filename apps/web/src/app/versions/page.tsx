@@ -6,21 +6,21 @@ import {
   APP_VERSION,
   APP_VERSION_LABEL,
   kindLabel,
-  minorReleaseLines,
+  publicMinorReleaseLines,
   PRODUCT_NAME,
   PRODUCT_PUBLISHER,
-  sortedProductReleases,
+  publicProductReleases,
   VERSIONING_POLICY,
 } from '@idrac/shared';
 import { ChevronRight, Package } from 'lucide-react';
 import PublicChrome from '@/components/layout/public-chrome';
 
 export default function VersionsPage() {
-  const lines = minorReleaseLines();
-  const all = sortedProductReleases();
+  const lines = publicMinorReleaseLines();
+  const milestones = publicProductReleases();
 
   return (
-    <PublicChrome mainClassName="bg-bg-body py-10">
+    <PublicChrome mainClassName="py-8 sm:py-10">
       <div className="max-w-3xl mb-8">
         <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-dell-blue/10 text-dell-blue text-xs font-semibold mb-3">
           <Package className="w-3.5 h-3.5" /> Version manager
@@ -30,7 +30,10 @@ export default function VersionsPage() {
           A product of <strong className="text-text-primary">{PRODUCT_PUBLISHER}</strong>. Current build:{' '}
           <span className="font-mono text-dell-blue">{APP_VERSION_LABEL}</span> ({APP_VERSION}).
         </p>
-        <p className="text-sm text-text-secondary mt-2 leading-relaxed">{VERSIONING_POLICY}</p>
+        <p className="text-sm text-text-secondary mt-2 leading-relaxed">
+          {VERSIONING_POLICY} Patch builds update the running version ({APP_VERSION_LABEL}) but are not listed below—only
+          major and minor milestones appear in this log.
+        </p>
         <p className="text-sm mt-3">
           <Link href="/docs#getting-started" className="text-dell-blue font-semibold hover:underline inline-flex items-center gap-0.5">
             Documentation <ChevronRight className="w-3.5 h-3.5" />
@@ -39,14 +42,14 @@ export default function VersionsPage() {
       </div>
 
       <div className="space-y-4 mb-10">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-text-primary">By minor line</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-text-primary">Release lines (milestones)</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {lines.map((line) => (
             <div key={line.line} className="bg-white border border-border-card rounded p-4">
               <div className="text-xs text-text-secondary uppercase tracking-wider">Line {line.line}.x</div>
               <div className="text-lg font-bold text-dell-blue tabular-nums mt-1">Latest v{line.latestVersion}</div>
               <div className="text-xs text-text-secondary mt-1">
-                {line.releases.length} release{line.releases.length === 1 ? '' : 's'} · latest {kindLabel(line.latestKind).toLowerCase()}
+                Milestone {kindLabel(line.latestKind).toLowerCase()} · line {line.line}.x
               </div>
             </div>
           ))}
@@ -54,13 +57,16 @@ export default function VersionsPage() {
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-text-primary">Release history</h2>
-        {all.map((release) => {
-          const isCurrent = release.version === APP_VERSION;
+        <h2 className="text-sm font-bold uppercase tracking-wide text-text-primary">Major & minor release log</h2>
+        {milestones.map((release) => {
+          const [rMaj, rMin] = release.version.split('.').map((n) => parseInt(n, 10));
+          const [aMaj, aMin] = APP_VERSION.split('.').map((n) => parseInt(n, 10));
+          const isCurrentLine = rMaj === aMaj && rMin === aMin;
+          const isExactCurrent = release.version === APP_VERSION;
           return (
             <article
               key={release.version}
-              className={`bg-white border rounded overflow-hidden ${isCurrent ? 'border-dell-blue ring-1 ring-dell-blue/20' : 'border-border-card'}`}
+              className={`bg-white border rounded overflow-hidden ${isExactCurrent ? 'border-dell-blue ring-1 ring-dell-blue/20' : 'border-border-card'}`}
             >
               <div className="bg-card-header px-4 py-3 border-b border-border-card flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -76,7 +82,12 @@ export default function VersionsPage() {
                   >
                     {kindLabel(release.kind)}
                   </span>
-                  {isCurrent && (
+                  {isCurrentLine && !isExactCurrent && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-dell-blue/10 text-dell-blue">
+                      Current line
+                    </span>
+                  )}
+                  {isExactCurrent && (
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-green-50 text-green-healthy">
                       Current
                     </span>

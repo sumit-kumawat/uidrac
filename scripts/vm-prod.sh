@@ -22,7 +22,7 @@ if [[ ! -f nginx/certs/fullchain.pem ]] || [[ ! -f nginx/certs/privkey.pem ]]; t
 fi
 
 echo "Building legacy console image (iDRAC 6/7)…"
-docker build -f docker/idrac-legacy.Dockerfile -t universal-idrac-console:legacy .
+docker build -f docker/idrac-legacy.Dockerfile -t uidrac:legacy .
 
 echo "Starting production stack…"
 docker compose -f docker-compose.prod.yml up -d --build

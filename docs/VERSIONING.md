@@ -1,5 +1,7 @@
 # Application versioning
 
+**Repositories:** [Open-source fork](https://github.com/sumit-kumawat/uidrac) · [Conzex product](https://github.com/conzex/UiDRAC)
+
 - **Current version:** stored in `.idrac-version-state.json` and `packages/shared/src/version.ts` (`APP_VERSION`).
 - **Release catalog:** `packages/shared/src/release-history.json` (major/minor/patch entries with core implementation notes).
 - **Initial release:** v1.0.0

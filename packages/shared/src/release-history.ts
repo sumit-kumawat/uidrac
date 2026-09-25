@@ -21,7 +21,6 @@ export type MinorReleaseLine = {
   latestKind: ReleaseKind;
 };
 
-export const PRODUCT_NAME = catalog.productName;
 export const PRODUCT_PUBLISHER = catalog.publisher;
 export const VERSIONING_POLICY = catalog.versioningPolicy;
 
@@ -54,7 +53,44 @@ export function currentProductRelease(): ProductRelease | undefined {
   return releaseByVersion(APP_VERSION);
 }
 
-/** Group releases under minor lines (1.0.x, 1.1.x, 1.2.x). */
+/** Milestone releases shown on the version manager (major + minor only). */
+export function publicProductReleases(): ProductRelease[] {
+  return sortedProductReleases().filter((r) => r.kind === 'major' || r.kind === 'minor');
+}
+
+/** Minor lines derived from milestone releases only (for version manager summary cards). */
+export function publicMinorReleaseLines(): MinorReleaseLine[] {
+  const map = new Map<string, ProductRelease[]>();
+  for (const r of publicProductReleases()) {
+    const [major, minor] = parseVersion(r.version);
+    const line = `${major}.${minor}`;
+    const list = map.get(line) ?? [];
+    list.push(r);
+    map.set(line, list);
+  }
+
+  const lines: MinorReleaseLine[] = [];
+  for (const [line, releases] of map.entries()) {
+    const sorted = [...releases].sort(compareSemverDesc);
+    const [major, minor] = parseVersion(sorted[0].version);
+    lines.push({
+      line,
+      major,
+      minor,
+      releases: sorted,
+      latestVersion: sorted[0].version,
+      latestKind: sorted[0].kind,
+    });
+  }
+
+  lines.sort((a, b) => {
+    if (a.major !== b.major) return b.major - a.major;
+    return b.minor - a.minor;
+  });
+  return lines;
+}
+
+/** Group releases under minor lines (1.0.x, 1.1.x, 1.2.x) — full catalog including patches. */
 export function minorReleaseLines(): MinorReleaseLine[] {
   const map = new Map<string, ProductRelease[]>();
   for (const r of PRODUCT_RELEASES) {

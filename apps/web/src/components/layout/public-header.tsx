@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import { PRODUCT_NAME } from '@idrac/shared';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { BookOpen, Mail, Menu, X, LayoutDashboard } from 'lucide-react';
@@ -49,9 +50,9 @@ export default function PublicHeader() {
       <div className={PAGE_CONTAINER_CLASS}>
         <div className="h-[52px] flex items-center justify-between gap-4 min-w-0">
           <Link href={logoHref} className="flex items-center gap-3 hover:opacity-90 transition-opacity shrink-0 min-w-0">
-            <img src="/logo.png" alt="iDRAC Console" className="h-7 brightness-0 invert" />
+            <img src="/logo.png" alt={PRODUCT_NAME} className="h-7 brightness-0 invert" />
             <div className="w-px h-6 bg-white/30 hidden sm:block" />
-            <span className="text-sm font-semibold tracking-wide hidden sm:block">Universal iDRAC Console</span>
+            <span className="text-sm font-semibold tracking-wide hidden sm:block">{PRODUCT_NAME}</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm shrink-0" aria-label="Primary">

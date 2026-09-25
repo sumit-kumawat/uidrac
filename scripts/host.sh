@@ -11,9 +11,9 @@ if [[ ! -f .env ]]; then
 fi
 
 echo "Building and starting services (postgres, redis, api, web, console-gw)…"
-if ! docker image inspect universal-idrac-console:legacy >/dev/null 2>&1; then
+if ! docker image inspect uidrac:legacy >/dev/null 2>&1; then
   echo "Building legacy console image (first run)…"
-  docker build -f docker/idrac-legacy.Dockerfile -t universal-idrac-console:legacy .
+  docker build -f docker/idrac-legacy.Dockerfile -t uidrac:legacy .
 fi
 docker compose up -d --build
 

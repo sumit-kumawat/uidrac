@@ -6,8 +6,14 @@ cd "$ROOT"
 
 if [[ ! -f .env ]]; then
   echo "Missing .env — run: cp .env.example .env"
-  echo "Then: bash scripts/generate-keys.sh  (paste secrets into .env)"
+  echo "Then: bash scripts/generate-keys.sh --write  (replaces public lab keys in .env)"
   exit 1
+fi
+
+if grep -q '^JWT_SECRET=dev-jwt-secret-change-in-production' .env 2>/dev/null; then
+  echo "⚠️  OPEN SOURCE WARNING: .env still uses public lab defaults from .env.example."
+  echo "   Run: bash scripts/generate-keys.sh --write   (required before production or shared LAN)"
+  echo ""
 fi
 
 echo "Building and starting services (postgres, redis, api, web, console-gw)…"

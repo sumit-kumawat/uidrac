@@ -25,9 +25,11 @@ Dual-repo engineering notes: [REPOS.md](REPOS.md)
 ```bash
 git clone https://github.com/sumit-kumawat/uidrac.git && cd uidrac
 cp .env.example .env
-bash scripts/generate-keys.sh    # paste values into .env
+bash scripts/generate-keys.sh --write   # required before production; replaces public lab defaults
 bash scripts/host.sh
 ```
+
+> **Security (open source only):** `.env.example` contains **temporary lab keys that are public in GitHub**. They are fine for `localhost` trials only. For anything on a network or the internet, run `generate-keys.sh --write` and treat the old defaults as compromised.
 
 Open **http://localhost:3000** → Register → Add Server (iDRAC IP + credentials).
 

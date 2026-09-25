@@ -8,12 +8,10 @@ name: uidrac
 
 x-rhel-docker: &rhel-docker
   userns_mode: "host"
-  cgroupns_mode: "host"
   security_opt:
     - label=disable
     - apparmor=unconfined
     - seccomp=unconfined
-    - systempaths=unmasked
 
 services:
   # ── PostgreSQL 16 ──

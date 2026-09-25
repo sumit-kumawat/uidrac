@@ -54,7 +54,17 @@ fi
 if command -v systemd-detect-virt >/dev/null 2>&1; then
   VIRT="$(systemd-detect-virt -c 2>/dev/null || true)"
   if [[ "$VIRT" == "lxc" || "$VIRT" == "container" ]]; then
-    echo "⚠️  Nested container detected ($VIRT). Host must allow nesting (Proxmox: lxc.apparmor.profile=unconfined or Incus security.nesting=true)."
+    echo "╔══════════════════════════════════════════════════════════════════════════╗"
+    echo "║  NESTED LXC DETECTED — Docker often CANNOT run until the Proxmox HOST   ║"
+    echo "║  configures this CT (nesting + lxc.apparmor.profile=unconfined).        ║"
+    echo "║  See: docs/PROXMOX-LXC-DOCKER.md  — or use a KVM VM instead.            ║"
+    echo "╚══════════════════════════════════════════════════════════════════════════╝"
+    echo ""
+    if ! docker run --rm hello-world >/dev/null 2>&1; then
+      echo "ERROR: docker run hello-world failed. Fix LXC on Proxmox host before bash scripts/host.sh"
+      echo ""
+      exit 1
+    fi
   fi
 fi
 

@@ -45,7 +45,9 @@ Open **http://localhost:3000** → Register → Add Server (iDRAC IP + credentia
 | 4 | TLS in `nginx/certs/` ([help](nginx/certs/README.md)); `server_name` in `nginx/nginx.conf` |
 | 5 | `bash scripts/vm-prod.sh` → `curl -sk https://YOUR_HOST/api/health` |
 
-If `docker compose up` fails with **sysctl / permission denied**, see [docs/DOCKER-TROUBLESHOOTING.md](docs/DOCKER-TROUBLESHOOTING.md) and run `sudo bash scripts/fix-docker-sysctl.sh`.
+If `docker compose` fails with **sysctl permission denied** and `systemd-detect-virt -c` shows **`lxc`**, see **[docs/PROXMOX-LXC-DOCKER.md](docs/PROXMOX-LXC-DOCKER.md)** — a Proxmox **KVM VM** is the simplest path.
+
+If `docker compose` reports **`cgroupns_mode not allowed`**, run `git pull` (fixed in recent commits).
 
 Optional: **Cloudflare Tunnel** → origin `https://127.0.0.1:443` — [docs/CLOUDFLARE-TUNNEL.md](docs/CLOUDFLARE-TUNNEL.md).
 

@@ -18,6 +18,12 @@ if grep -q '^JWT_SECRET=dev-jwt-secret-change-in-production' .env 2>/dev/null; t
 fi
 
 echo "Building and starting services (postgres, redis, api, web, console-gw)…"
+if ! sysctl net.ipv4.ip_unprivileged_port_start >/dev/null 2>&1; then
+  echo "⚠️  Docker sysctl check failed. If containers fail to start, run as root:"
+  echo "   bash scripts/fix-docker-sysctl.sh"
+  echo "   See docs/DOCKER-TROUBLESHOOTING.md"
+  echo ""
+fi
 if ! docker image inspect uidrac:legacy >/dev/null 2>&1; then
   echo "Building legacy console image (first run)…"
   docker build -f docker/idrac-legacy.Dockerfile -t uidrac:legacy .

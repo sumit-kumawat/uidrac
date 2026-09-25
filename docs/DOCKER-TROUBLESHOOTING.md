@@ -9,54 +9,54 @@ OCI runtime create failed: runc create failed: ...
 open sysctl net.ipv4.ip_unprivileged_port_start file: reopen fd 8: permission denied
 ```
 
-This comes from the **host** Docker/runc/kernel setup, not from uidrac application code. It often appears on **RHEL, Rocky, Alma, CentOS Stream** with certain Docker, **SELinux**, or user-namespace combinations.
+This is usually **not** uidrac application code. With **Docker 27+ / runc 1.5+**, a known interaction with **AppArmor** (and nested **LXC/Proxmox** guests) makes runc fail when applying sysctls — [opencontainers/runc#4968](https://github.com/opencontainers/runc/issues/4968) (CVE-2025-52881). **SELinux off does not fix it** if AppArmor is still active.
 
-### Fix (step by step)
+### Fix (do this first)
 
-As **root** on the VM:
+As **root**:
 
 ```bash
 cd ~/uidrac
 git pull
-bash scripts/fix-docker-sysctl.sh
+bash scripts/fix-docker-sysctl.sh    # sysctl + AppArmor workaround + restart Docker
 docker compose down
 docker compose up -d
 ```
 
-`docker-compose.yml` sets **`userns_mode: host`** and **`security_opt: label=disable`** on every service (RHEL workaround). Pull the latest repo if those lines are missing.
+The script:
 
-### If sysctl alone is not enough
+1. Sets `net.ipv4.ip_unprivileged_port_start=0`
+2. If AppArmor is enabled, applies the bind-mount workaround so Docker/runc can start containers
+3. Restarts Docker
+
+`docker-compose.yml` also sets `apparmor=unconfined`, `userns_mode: host`, and related options on each service.
+
+### Verify AppArmor was the cause
 
 ```bash
-bash scripts/fix-docker-sysctl.sh --selinux-permissive
-docker compose down && docker compose up -d
+cat /sys/module/apparmor/parameters/enabled   # Y = enabled
+docker run --rm hello-world                 # should work after fix script
 ```
 
-That sets SELinux to **permissive until reboot** as a diagnostic step. If that fixes startup, do not leave permissive on in production without a proper policy — keep the compose `userns_mode` / `label=disable` settings from the repo.
+### Nested LXC / Proxmox / Incus
 
-### Manual sysctl
+If this VM is itself an **LXC container**, the **host** must allow nesting, for example:
+
+- **Proxmox:** `lxc.apparmor.profile: unconfined` on the CT (or updated `lxc-pve` with Incus nesting fixes)
+- **Incus:** `security.nesting=true` on the parent instance
+
+Run inside the guest:
 
 ```bash
-echo 'net.ipv4.ip_unprivileged_port_start=0' > /etc/sysctl.d/99-docker-unprivileged-ports.conf
-sysctl --system
-systemctl restart docker
+systemd-detect-virt -c
 ```
 
 ### If it still fails
 
-1. **Update Docker** to current `docker-ce` from Docker’s official repo (`docker version`, `runc --version`).
-2. **Rootless Docker:** use **rootful** `docker-ce` (console gateway needs `/var/run/docker.sock`).
-3. Check **`/etc/docker/daemon.json`** for `"userns-remap"` — it conflicts with `userns_mode: host`; disable remapping for this stack.
-4. Collect: `docker version`, `runc --version`, `getenforce`, `uname -r`.
+1. **Pin Docker** to 27.x / runc 1.2 until the host AppArmor profile is updated (distro-specific).
+2. Use a **bare-metal or KVM VM**, not nested LXC, for production uidrac.
+3. Collect: `docker version`, `runc --version`, `cat /sys/module/apparmor/parameters/enabled`, `systemd-detect-virt -c`.
 
 ## Postgres / Redis not published on the host
 
-`docker-compose.yml` keeps Postgres and Redis on the internal `uidrac-net` network only (ports **5432** / **6379** are not bound on the VM). The API reaches them by service name. To connect with `psql` from the host, add a local override:
-
-```yaml
-# docker-compose.override.yml
-services:
-  postgres:
-    ports:
-      - "5432:5432"
-```
+Postgres and Redis are only on `uidrac-net`. The API uses `postgres:5432` and `redis:6379`. To expose Postgres on the host, add `docker-compose.override.yml` with `ports: ["5432:5432"]` on `postgres`.

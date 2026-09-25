@@ -6,9 +6,19 @@
 
 name: uidrac
 
+x-rhel-docker: &rhel-docker
+  userns_mode: "host"
+  cgroupns_mode: "host"
+  security_opt:
+    - label=disable
+    - apparmor=unconfined
+    - seccomp=unconfined
+    - systempaths=unmasked
+
 services:
   # ── PostgreSQL 16 ──
   postgres:
+    <<: *rhel-docker
     image: postgres:16-alpine
     container_name: uidrac-postgres
     restart: unless-stopped
@@ -33,6 +43,7 @@ services:
 
   # ── Redis 7 ──
   redis:
+    <<: *rhel-docker
     image: redis:7-alpine
     container_name: uidrac-redis
     restart: unless-stopped
@@ -54,6 +65,7 @@ services:
 
   # ── NestJS API ──
   api:
+    <<: *rhel-docker
     build:
       context: .
       dockerfile: docker/api.Dockerfile
@@ -97,6 +109,7 @@ services:
 
   # ── Next.js Frontend ──
   web:
+    <<: *rhel-docker
     build:
       context: .
       dockerfile: docker/web.Dockerfile
@@ -127,6 +140,7 @@ services:
 
   # ── Console Gateway ──
   console-gw:
+    <<: *rhel-docker
     build:
       context: .
       dockerfile: docker/console-gw.Dockerfile
@@ -157,6 +171,7 @@ services:
 
   # ── Nginx Reverse Proxy ──
   nginx:
+    <<: *rhel-docker
     image: nginx:1.27-alpine
     container_name: uidrac-nginx
     restart: unless-stopped

@@ -6,11 +6,15 @@
 
 name: uidrac
 
-# RHEL/Rocky/Alma: avoids runc sysctl "permission denied" (see docs/DOCKER-TROUBLESHOOTING.md)
+# RHEL / LXC / AppArmor+runc: see docs/DOCKER-TROUBLESHOOTING.md (CVE-2025-52881)
 x-rhel-docker: &rhel-docker
   userns_mode: "host"
+  cgroupns_mode: "host"
   security_opt:
     - label=disable
+    - apparmor=unconfined
+    - seccomp=unconfined
+    - systempaths=unmasked
 
 services:
   # ── PostgreSQL 16 ──

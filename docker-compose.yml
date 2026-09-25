@@ -6,9 +6,16 @@
 
 name: uidrac
 
+# RHEL/Rocky/Alma: avoids runc sysctl "permission denied" (see docs/DOCKER-TROUBLESHOOTING.md)
+x-rhel-docker: &rhel-docker
+  userns_mode: "host"
+  security_opt:
+    - label=disable
+
 services:
   # ── PostgreSQL 16 ──
   postgres:
+    <<: *rhel-docker
     image: postgres:16-alpine
     container_name: uidrac-postgres
     restart: unless-stopped
@@ -29,6 +36,7 @@ services:
 
   # ── Redis 7 ──
   redis:
+    <<: *rhel-docker
     image: redis:7-alpine
     container_name: uidrac-redis
     restart: unless-stopped
@@ -44,6 +52,7 @@ services:
 
   # ── NestJS API ──
   api:
+    <<: *rhel-docker
     build:
       context: .
       dockerfile: docker/api.Dockerfile
@@ -90,6 +99,7 @@ services:
 
   # ── Next.js Frontend ──
   web:
+    <<: *rhel-docker
     build:
       context: .
       dockerfile: docker/web.Dockerfile
@@ -115,6 +125,7 @@ services:
 
   # ── Console Gateway ──
   console-gw:
+    <<: *rhel-docker
     build:
       context: .
       dockerfile: docker/console-gw.Dockerfile

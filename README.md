@@ -22,11 +22,13 @@ Dual-repo engineering notes: [REPOS.md](REPOS.md)
 
 ## Try it locally (5 minutes)
 
+**Requires a KVM/bare-metal Linux VM with working Docker** — not Proxmox LXC. See [docs/DEPLOYMENT-KVM-VM.md](docs/DEPLOYMENT-KVM-VM.md).
+
 ```bash
 git clone https://github.com/sumit-kumawat/uidrac.git && cd uidrac
 cp .env.example .env
 bash scripts/generate-keys.sh --write   # required before production; replaces public lab defaults
-bash scripts/host.sh
+bash scripts/host-vm.sh                 # preflight + compose (use on a real VM)
 ```
 
 > **Security (open source only):** `.env.example` contains **temporary lab keys that are public in GitHub**. They are fine for `localhost` trials only. For anything on a network or the internet, run `generate-keys.sh --write` and treat the old defaults as compromised.

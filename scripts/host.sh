@@ -17,19 +17,9 @@ if grep -q '^JWT_SECRET=dev-jwt-secret-change-in-production' .env 2>/dev/null; t
   echo ""
 fi
 
-echo "Building and starting services (postgres, redis, api, web, console-gw)…"
-if ! sysctl net.ipv4.ip_unprivileged_port_start >/dev/null 2>&1; then
-  echo "⚠️  Docker sysctl check failed. Run as root:"
-  echo "   bash scripts/fix-docker-sysctl.sh"
-  echo "   See docs/DOCKER-TROUBLESHOOTING.md"
-  echo ""
-fi
+bash "$(dirname "$0")/preflight-docker.sh"
 
-if [[ -f /sys/module/apparmor/parameters/enabled ]] && grep -qE '^Y' /sys/module/apparmor/parameters/enabled 2>/dev/null; then
-  echo "⚠️  AppArmor + runc 1.5+ can block all containers. Run as root before compose:"
-  echo "   bash scripts/fix-docker-sysctl.sh"
-  echo ""
-fi
+echo "Building and starting services (postgres, redis, api, web, console-gw)…"
 if ! docker image inspect uidrac:legacy >/dev/null 2>&1; then
   echo "Building legacy console image (first run)…"
   docker build -f docker/idrac-legacy.Dockerfile -t uidrac:legacy .
@@ -51,7 +41,6 @@ echo "  Portal:  http://localhost:3000"
 echo "  API:     http://localhost:4000/api"
 echo "  Health:  http://localhost:4000/api/health"
 echo ""
-echo "Production on a VM:  cp .env.selfhosted.example .env  &&  bash scripts/vm-prod.sh"
-echo "  See README.md and docs/DEPLOYMENT.md"
+echo "Production on a KVM VM:  docs/DEPLOYMENT-KVM-VM.md  &&  bash scripts/vm-prod.sh"
 echo ""
 docker compose ps

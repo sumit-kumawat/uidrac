@@ -1,23 +1,38 @@
-# Running uidrac in a Proxmox LXC container
+# Proxmox LXC vs KVM for uidrac
 
-If `systemd-detect-virt -c` prints **`lxc`**, this VM is a **nested container**. Docker 29 + runc 1.5 often fails with:
+**uidrac requires Docker.** Docker **inside a Proxmox LXC** often fails with:
 
 ```text
 open sysctl net.ipv4.ip_unprivileged_port_start file: reopen fd 8: permission denied
 ```
 
-The bind-mount AppArmor workaround **inside** the CT is **not enough** on many Proxmox setups. You must change the **Proxmox host** configuration for this CT, or run uidrac on a **KVM/QEMU VM** instead (recommended for production).
+That is a **nested container + runc** limitation, not an application bug. **We do not support running the Docker stack inside an unconfigured LXC.**
 
-## Option A — Fix the LXC on the Proxmox host (advanced)
+## What to do
 
-On the **Proxmox node** (SSH to `pve`, not inside `uidrac`):
+| Environment | Action |
+|-------------|--------|
+| **Proxmox LXC (your current `uidrac` CT)** | Do **not** run `host.sh` here until you move, or fix the CT on the **Proxmox host** (below). |
+| **Production / recommended** | Create a **KVM/QEMU VM** → [DEPLOYMENT-KVM-VM.md](./DEPLOYMENT-KVM-VM.md) |
+| **Advanced** | Reconfigure this LXC on the **hypervisor** (Option A) |
 
-1. Find the CT ID (Proxmox UI → your CT → ID, or `pct list | grep uidrac`).
+## Important: where commands run
 
-2. Enable nesting and relax AppArmor for Docker (replace `CTID`):
+| Command | Where |
+|---------|--------|
+| `pct`, `/etc/pve/lxc/*.conf` | **Proxmox host** (SSH to `pve`, hostname usually not `uidrac`) |
+| `docker compose`, `host.sh`, `git clone` | **Inside** the Linux guest (VM or CT) |
+
+If `pct: command not found`, you are **inside** the CT — switch to the Proxmox host shell.
+
+## Option A — Fix LXC on the Proxmox host (advanced)
+
+1. On the **Proxmox host**, find CT ID: `pct list` (look for your CT name/IP).
+
+2. Replace **`100`** with your real ID (not the literal `???`):
 
 ```bash
-CTID=100   # ← your CT id
+CTID=100
 
 pct set "$CTID" -features nesting=1
 
@@ -28,27 +43,24 @@ grep -q 'lxc.cgroup2.devices.allow' "$CFG" 2>/dev/null || echo 'lxc.cgroup2.devi
 pct reboot "$CTID"
 ```
 
-3. After reboot, **inside** the CT:
+3. **Inside** the CT after reboot:
 
 ```bash
 bash scripts/fix-docker-sysctl.sh
-docker run --rm hello-world
-cd ~/uidrac && docker compose up -d
+bash scripts/preflight-docker.sh
+bash scripts/host.sh
 ```
 
-If `hello-world` still fails, use **Option B**.
+If `preflight-docker.sh` still fails, use a **KVM VM** instead.
 
-## Option B — Use a KVM VM (recommended)
+## Option B — KVM VM (recommended)
 
-Create a normal **Linux VM** (not LXC) on Proxmox, install Docker, clone uidrac, run `bash scripts/host.sh`. No nesting/AppArmor conflicts.
+[DEPLOYMENT-KVM-VM.md](./DEPLOYMENT-KVM-VM.md)
 
-## Option C — Install on the Proxmox host itself
-
-Only if policy allows — run Docker directly on the Proxmox node (not ideal for cluster hygiene).
-
-## Verify
+## Verify environment
 
 ```bash
-systemd-detect-virt -c    # should be "none" or "kvm" on a proper VM
+systemd-detect-virt -c    # want: none or kvm — not lxc
 docker run --rm hello-world
+bash scripts/preflight-docker.sh
 ```

@@ -34,8 +34,7 @@ COPY --from=deps /app/packages ./packages
 
 COPY . .
 
-# Generate Prisma client (needed for types)
-RUN pnpm db:generate
+RUN pnpm install --frozen-lockfile --ignore-scripts && pnpm db:generate
 
 # Build Next.js with standalone output
 ENV NEXT_TELEMETRY_DISABLED=1

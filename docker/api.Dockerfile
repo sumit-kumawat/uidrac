@@ -34,8 +34,8 @@ COPY --from=deps /app/packages ./packages
 
 COPY . .
 
-# Generate Prisma client
-RUN pnpm db:generate
+# COPY . . omits dockerignored node_modules; reinstall workspace deps then generate client
+RUN pnpm install --frozen-lockfile --ignore-scripts && pnpm db:generate
 
 # Build shared packages first, then API
 RUN pnpm --filter @idrac/shared build && \
@@ -51,9 +51,8 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/packages ./packages
 COPY . .
-
-RUN pnpm db:generate
 
 EXPOSE 4000
 
